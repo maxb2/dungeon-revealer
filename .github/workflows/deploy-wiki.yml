@@ -31,7 +31,7 @@ jobs:
     - name: Push Wiki Changes
       uses: docker://decathlon/wiki-page-creator-action:2.0.1
       env:
-        GH_PAT: ${{ secrets.GH_PAT }}
+        GH_PAT: ${{ secrets.GITHUB_TOKEN }}
         MD_FOLDER: wiki/
         OWNER: dungeon-revealer
         REPO_NAME: dungeon-revealer
