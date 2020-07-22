@@ -1,0 +1,26 @@
+on:
+  release:
+    types: [published]
+
+jobs:
+  job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Discord notification
+        if: ${{ github.event.release.prerelease }} # Only prereleases
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "${{ github.event.repository.name }}@${{ github.event.release.tag_name }} has been deployed. Check out the prerelease at ${{ github.event.release.html_url }}. Help us test before the release is finalized."
+
+      - name: Discord notification
+        if: ${{ ! github.event.release.prerelease }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: "${{ github.event.repository.name }}@${{ github.event.release.tag_name }} has been deployed. Check out the release at ${{ github.event.release.html_url }}."
