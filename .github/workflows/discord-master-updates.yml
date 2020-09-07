@@ -22,8 +22,6 @@ jobs:
           echo "${{ github.event.repository.name }}"
           echo "${{ github.event.ref }}"
           echo "${{ github.event }}"
-          echo ###
-          printf "%s\n" "${${{ github.event.commits }}[@]}"
           echo toJson(github.event.commits)
 
 
