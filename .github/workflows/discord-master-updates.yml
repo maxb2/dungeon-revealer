@@ -15,14 +15,15 @@ jobs:
         run: |
           set -x
           echo "::set-env name=COMMIT_SHORT::$(git rev-parse --short HEAD)"
-          echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "[dungeon-revealer:master] new commit" --arg desc "${{ github.event.head_commit.message }}" --arg url "${{ github.event.head_commit.url }}" '[{"title": $title, "url": $url, "description": $desc}]')"
+          echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "[dungeon-revealer:master] new commit" --arg url "${{ github.event.compare }}" --arg desc "${{ github.event.head_commit.message }}" '[{"title": $title, "url": $url, "description": $desc}]')"
           echo "${{ github.event.before }}"
           echo "${{ github.event.after }}"
           echo "${{ github.event.compare }}"
           echo "${{ github.event.repository.name }}"
           echo "${{ github.event.ref }}"
           echo "${{ github.event }}"
-          echo ${{ join(github.event.commits.*) }}
+          echo "${{ github.event.commits[0] }}"
+          echo ${{ join(github.event.commits) }}
 
 
 
