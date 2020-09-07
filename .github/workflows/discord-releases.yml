@@ -15,9 +15,10 @@ jobs:
         if: ${{ ! github.event.release.prerelease }} # Only prereleases
         run: |
           BODY=''
-          for line in "${{ github.event.release.body }}"; do
-            BODY=$BODY"> $line"$'\n'
-          done
+          while IFS= read -r line
+          do
+             BODY=$BODY"> $line"$'\n'
+          done < <(printf '%s\n' "${{ github.event.release.body }}")
           DESC="@everyone [${{ github.event.repository.name }}@${{ github.event.release.tag_name }}](${{ github.event.release.html_url }}) release has been deployed!"$'\n'"$BODY"
           echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "${{ github.event.release.name }} release" --arg url "${{ github.event.release.html_url }}" --arg color "26880" --arg desc "$DESC" '[{"title": $title, "url": $url, "color": $color, "description": $desc}]')"
 
@@ -26,9 +27,10 @@ jobs:
         if: ${{ github.event.release.prerelease }} # Only prereleases
         run: |
           BODY=''
-          for line in "${{ github.event.release.body }}"; do
-            BODY=$BODY"> $line"$'\n'
-          done
+          while IFS= read -r line
+          do
+             BODY=$BODY"> $line"$'\n'
+          done < <(printf '%s\n' "${{ github.event.release.body }}")
           DESC="@everyone [${{ github.event.repository.name }}@${{ github.event.release.tag_name }}](${{ github.event.release.html_url }}) prerelease has been deployed! Check out the prerelease and help us test before the release is finalized. Join the discussion in #feedback"$'\n'"$'\n'"$BODY"
           echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "${{ github.event.release.name }} prerelease" --arg url "${{ github.event.compare }}" --arg color "26880" --arg desc "$DESC" '[{"title": $title, "url": $url, "color": $color, "description": $desc}]')"
 
