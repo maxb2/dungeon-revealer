@@ -20,7 +20,7 @@ jobs:
               _jq() {
                echo ${row} | base64 --decode | jq -r ${1}
               }
-             DESC=$DESC$(printf "[%s](%s) %s\\n" "$(_jq '.id' | cut -c -7)" "$(_jq '.url')" "$(_jq '.message')")
+             DESC=$DESC$(printf "[%s](%s) %s" "$(_jq '.id' | cut -c -7)" "$(_jq '.url')" "$(_jq '.message')")'\n'
           done
           echo "$DESC"
           echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "[${{ github.event.repository.name }}:${GITHUB_REF##*/}] new commit" --arg url "${{ github.event.compare }}" --arg desc "$DESC" '[{"title": $title, "url": $url, "description": $desc}]')"
