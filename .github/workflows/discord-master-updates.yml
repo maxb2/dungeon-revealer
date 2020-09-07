@@ -14,8 +14,15 @@ jobs:
       - name: "Set environment: master"
         run: |
           echo "::set-env name=COMMIT_SHORT::$(git rev-parse --short HEAD)"
-          echo "::set-env name=EVENT::${{ github.event }}"
+          echo "::set-env name=COMMITS::${{ github.event.commits }}"
           echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "[dungeon-revealer:master] new commit" --arg desc "${{ github.event.head_commit.message }}" --arg url "${{ github.event.head_commit.url }}" '[{"title": $title, "url": $url, "description": $desc}]')"
+          echo "${{ github.event.before }}"
+          echo "${{ github.event.after }}"
+          echo "${{ github.event.compare }}"
+          echo "${{ github.event.repository.name }}"
+          echo "${{ github.event.ref }}"
+          echo "${{ github.event }}"
+
 
       - name: Discord notification
         env:
