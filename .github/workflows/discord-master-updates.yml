@@ -14,12 +14,11 @@ jobs:
       - name: "Set environment: master"
         run: |
           echo "::set-env name=COMMIT_SHORT::$(git rev-parse --short HEAD)"
-          echo "::set-env name=EMBED_MESSAGE::$(jq -nc --arg title "[dungeon-revealer:master] new commit" --arg desc "${{ github.event.head_commit.message }}" --arg url "${{ github.event.head_commit.url }}" '{"embeds": [{"title": $title, "url": $url, "description": $desc}]}')"
+          echo "::set-env name=DISCORD_EMBEDS::\'$(jq -nc --arg title "[dungeon-revealer:master] new commit" --arg desc "${{ github.event.head_commit.message }}" --arg url "${{ github.event.head_commit.url }}" '{"embeds": [{"title": $title, "url": $url, "description": $desc}]}')\'"
 
       - name: Discord notification
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_UPDATES }}
-          DISCORD_EMBEDS: ${{ env.EMBED_MESSAGE }}
         uses: Ilshidur/action-discord@0.3.0
         with:
           args: "New commit pushed, master@${{ env.COMMIT_SHORT }}: *${{ github.event.head_commit.message }}*\n <${{ github.event.head_commit.url }}>"
