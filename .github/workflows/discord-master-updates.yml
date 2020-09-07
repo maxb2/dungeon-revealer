@@ -21,9 +21,7 @@ jobs:
           echo "${{ github.event.compare }}"
           echo "${{ github.event.repository.name }}"
           echo "${{ github.event.ref }}"
-          echo ${{ github.event.commits }}
-          echo ${{ join(github.event.commits) }}
-
+          cat env.GITHUB_EVENT_PATH	
 
 
       - name: Discord notification
