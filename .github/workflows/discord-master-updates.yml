@@ -13,6 +13,7 @@ jobs:
 
       - name: "Set environment: master"
         run: |
+          set -x
           echo "::set-env name=COMMIT_SHORT::$(git rev-parse --short HEAD)"
           echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "[dungeon-revealer:master] new commit" --arg desc "${{ github.event.head_commit.message }}" --arg url "${{ github.event.head_commit.url }}" '[{"title": $title, "url": $url, "description": $desc}]')"
           echo "${{ github.event.before }}"
@@ -21,8 +22,6 @@ jobs:
           echo "${{ github.event.repository.name }}"
           echo "${{ github.event.ref }}"
           echo "{{ github.event }}"
-          echo ###
-          printf "%s\n" "${${{ github.event.commits }}[@]}"
           echo toJson(github.event.commits)
 
 
