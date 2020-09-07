@@ -22,7 +22,7 @@ jobs:
           echo "${{ github.event.repository.name }}"
           echo "${{ github.event.ref }}"
           echo "${{ github.event }}"
-          echo toJson(github.event.commits)
+          echo ${{join(github.event.commits)}}
 
 
 
