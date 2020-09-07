@@ -14,14 +14,17 @@ jobs:
       - name: "Set environment: master"
         run: |
           set -x
-          echo "::set-env name=COMMIT_SHORT::$(git rev-parse --short HEAD)"
-          echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "[dungeon-revealer:master] new commit" --arg url "${{ github.event.compare }}" --arg desc "${{ github.event.head_commit.message }}" '[{"title": $title, "url": $url, "description": $desc}]')"
-          echo "${{ github.event.before }}"
-          echo "${{ github.event.after }}"
-          echo "${{ github.event.compare }}"
-          echo "${{ github.event.repository.name }}"
-          echo "${{ github.event.ref }}"
-          cat $GITHUB_EVENT_PATH	
+          COMMITS=$(cat $GITHUB_EVENT_PATH | jq -c '.commits')
+          DESC=''
+          for row in $(echo "${COMMITS}" | jq -r '.[] | @base64'); do
+              _jq() {
+               echo ${row} | base64 --decode | jq -r ${1}
+              }
+             DESC=$DESC$(printf "[%s](%s) %s\\\n" $(_jq '.id' | cut -c -7) $(_jq '.url') $(_jq '.message'))
+          done
+          echo "$DESC"
+          echo "::set-env name=DISCORD_EMBEDS::$(jq -nc --arg title "[${{ github.event.repository.name }}:${GITHUB_REF##*/}] new commit" --arg url "${{ github.event.compare }}" --arg desc "$DESC" '[{"title": $title, "url": $url, "description": $desc}]')"
+
 
 
       - name: Discord notification
