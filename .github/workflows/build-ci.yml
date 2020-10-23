@@ -27,6 +27,19 @@ jobs:
         env:
           CI: true
 
+      - name: Smoke test
+        run: |
+          npm run start > smoke.log 2>&1 &   # Start server in background process and save output to smoke.log
+          PID=$! # Get pid of background process
+          sleep 60
+          if ps -p $PID # Check if process is still running
+          then
+            cat smoke.log # Output the log
+          else
+            cat smoke.log
+            wait $PID # Return exit status of background process
+          fi
+
   docker:
     runs-on: ubuntu-latest
     steps:
