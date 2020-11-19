@@ -10,6 +10,8 @@ A web app for tabletop gaming to allow the game master to reveal areas of the ga
 Join the [discord server](https://discord.gg/dS5khqk).
 Check out the [wiki](https://github.com/dungeon-revealer/dungeon-revealer/wiki) for a detailed walkthrough!
 
+[![Deploy to DO](https://mp-assets1.sfo2.digitaloceanspaces.com/deploy-to-do/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/maxb2/dungeon-revealer/tree/digital-ocean-deploy)
+
 ## What the DM Sees
 
 ![alt text](https://user-images.githubusercontent.com/14338007/83942937-68312280-a7f8-11ea-9a63-8307f1c12d50.png "DM's View")
