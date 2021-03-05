@@ -1,27 +1,31 @@
 ARG NODE_VERSION=12.18.1
 
-FROM node:$NODE_VERSION
+FROM node:$NODE_VERSION as base
 
 WORKDIR /usr/src/build
+
+FROM base as builder
 
 COPY . .
 
 RUN echo "unsafe-perm = true" > .npmrc
 
-RUN npm install
+RUN npm install 
 
-ARG SPACE=4000
+RUN npm run build
 
-RUN export NODE_OPTIONS=--max_old_space_size=$SPACE
+FROM base as compiler
 
-RUN node ./scripts/copy-node-bindings-path.js
+# Copy app source
+COPY --from=builder /usr/src/build/build /usr/src/build/build
+COPY --from=builder /usr/src/build/server-build /usr/src/build/server-build
+COPY --from=builder /usr/src/build/node_modules /usr/src/build/node_modules
+COPY --from=builder  /usr/src/build/package.json /usr/src/build/package.json
+COPY --from=builder  /usr/src/build/package-lock.json /usr/src/build/package-lock.json
 
-ARG FETCH_CMD=true
-
-RUN eval $FETCH_CMD
-
-ARG ARCH
-
-RUN npm run compile:$ARCH
+# Compile executable
+# caxa takes care of `npm prune --production`
+ARG CAXA_OUTPUT="dungeon-revealer.bin"
+RUN npx caxa --directory . --command "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js" --output "$CAXA_OUTPUT"
 
 CMD ["sh"]
