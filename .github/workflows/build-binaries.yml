@@ -99,7 +99,7 @@ jobs:
           npm install
           npm run build
           rm -rf node_modules
-          FETCH_CMD="mkdir -p ~/.pkg-cache/v2.6 && cd ~/.pkg-cache/v2.6 && wget https://github.com/dungeon-revealer/pkg-binaries/releases/download/v1.0.0/fetched-v12.18.1-linux-${{ matrix.arch }} -O fetched-v12.18.1-linux-${{ matrix.arch }}"
+          FETCH_CMD="mkdir -p ~/.pkg-cache/v2.6 && (cd ~/.pkg-cache/v2.6 && wget https://github.com/dungeon-revealer/pkg-binaries/releases/download/v1.0.0/fetched-v12.18.1-linux-${{ matrix.arch }} -O fetched-v12.18.1-linux-${{ matrix.arch }})"
           
           # export NODE_OPTIONS=--max_old_space_size=4000
           # node ./scripts/copy-node-bindings-path.js
@@ -110,7 +110,7 @@ jobs:
 
           echo $CMD
 
-          docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_arch }}/node:12.18.1 sh -c $CMD
+          docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_arch }}/node:12.18.1 sh -c "$CMD"
 
 
           # docker buildx build -f arm-compile.Dockerfile \
