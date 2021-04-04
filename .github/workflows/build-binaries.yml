@@ -71,7 +71,7 @@ jobs:
           - platform: linux/arm64/v8
             arch: arm64
             docker_arch: arm64v8
-            output: dungeon-revealer-linux-armv8
+            output: dungeon-revealer-linux-arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
