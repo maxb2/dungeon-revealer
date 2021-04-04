@@ -106,7 +106,7 @@ jobs:
           # $FETCH_CMD
           # npm run compile:${{ matrix.arch }}
 
-          CMD="echo "unsafe-perm = true" > .npmrc && export NODE_OPTIONS=--max_old_space_size=4000 && node ./scripts/copy-node-bindings-path.js && $FETCH_CMD && npm run compile:${{ matrix.arch }}"
+          CMD="echo 'unsafe-perm = true' > .npmrc && export NODE_OPTIONS='--max_old_space_size=4000' && node ./scripts/copy-node-bindings-path.js && $FETCH_CMD && npm run compile:${{ matrix.arch }}"
 
           docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_arch }}/node:12.18.1 sh -c $CMD
 
