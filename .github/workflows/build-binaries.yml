@@ -168,8 +168,7 @@ jobs:
           name: Release ${{ github.ref }}
           draft: true
           files: |
-            mv bin/*.zip
-
+            bin/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
