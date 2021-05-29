@@ -17,10 +17,13 @@ jobs:
         include:
           - os: ubuntu
             runner: ubuntu-20.04
+            output: dungeon-revealer-linux
           - os: macos
             runner: macos-latest
+            output: dungeon-revealer-macos
           - os: windows
             runner: windows-latest
+            output: dungeon-revealer.exe
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
