@@ -2,7 +2,7 @@ name: Build Binaries
 
 on:
   push:
-    branches: [master] # Run on master or tags
+    branches: '*' # Run on master or tags
     tags:
       - "v*"
 
@@ -40,22 +40,24 @@ jobs:
       - name: Compile x64 binary
         id: compile
         run: |
-          node ./scripts/copy-node-bindings-path.js
-          npm run compile
+          mkdir compile
+          cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ # copy only required files
+          cd compile
+          npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
 
-      - name: Package binary
-        run: |
-          mkdir dungeon-revealer-${{ matrix.os }}
-          mv ./bin/dungeon-revealer* ./dungeon-revealer-${{ matrix.os }}/
-          mv ./node_sqlite3.node ./dungeon-revealer-${{ matrix.os }}/
-          mv ./LICENSE ./dungeon-revealer-${{ matrix.os }}/
-          mv ./README.md ./dungeon-revealer-${{ matrix.os }}/
+      # - name: Package binary
+      #   run: |
+      #     mkdir dungeon-revealer-${{ matrix.os }}
+      #     mv ./bin/dungeon-revealer* ./dungeon-revealer-${{ matrix.os }}/
+      #     mv ./node_sqlite3.node ./dungeon-revealer-${{ matrix.os }}/
+      #     mv ./LICENSE ./dungeon-revealer-${{ matrix.os }}/
+      #     mv ./README.md ./dungeon-revealer-${{ matrix.os }}/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dungeon-revealer-${{ matrix.os }}
-          path: "dungeon-revealer-${{ matrix.os }}/"
+          name: binaries
+          path: "compile/${{ matrix.output }}"
 
   build_arm:
     name: ${{ matrix.arch }} Binaries
@@ -66,11 +68,11 @@ jobs:
         include:
           - platform: linux/arm/v7
             arch: armv7
-            docker_arch: arm32v7
+            docker_image: arm32v7/node:12
             output: dungeon-revealer-linux-armv7
           - platform: linux/arm64/v8
             arch: arm64
-            docker_arch: arm64v8
+            docker_image: arm64v8/node:12
             output: dungeon-revealer-linux-arm64
     steps:
       - name: Checkout code
@@ -96,28 +98,22 @@ jobs:
 
       - name: Build ${{ matrix.arch }}
         run: |
-          # Build app outside of docker
-          npm install
-          npm run build
-          rm -rf node_modules
-          FETCH_CMD="mkdir -p ~/.pkg-cache/v2.6 && (cd ~/.pkg-cache/v2.6 && wget https://github.com/dungeon-revealer/pkg-binaries/releases/download/v1.0.0/fetched-v12.18.1-linux-${{ matrix.arch }} -O fetched-v12.18.1-linux-${{ matrix.arch }})"
-          CMD="echo 'unsafe-perm = true' > .npmrc && npm install && export NODE_OPTIONS='--max_old_space_size=4000' && node ./scripts/copy-node-bindings-path.js && $FETCH_CMD && npm run compile:${{ matrix.arch }}"
-          # Compile in docker container
-          docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_arch }}/node:12.18.1 sh -c "$CMD"
+          CMD='npm install && npm run build && mkdir compile && cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ && cd compile && npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
+          docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_image }} sh -c "$CMD"
 
-      - name: Package binary
-        run: |
-          mkdir dungeon-revealer-linux-${{ matrix.arch }}
-          mv ./bin/dungeon-revealer-linux ./dungeon-revealer-linux-${{ matrix.arch }}/${{ matrix.output }}
-          mv ./node_sqlite3.node ./dungeon-revealer-linux-${{ matrix.arch }}/
-          mv ./LICENSE ./dungeon-revealer-linux-${{ matrix.arch }}/
-          mv ./README.md ./dungeon-revealer-linux-${{ matrix.arch }}/
+      # - name: Package binary
+      #   run: |
+      #     mkdir dungeon-revealer-linux-${{ matrix.arch }}
+      #     mv ./bin/dungeon-revealer-linux ./dungeon-revealer-linux-${{ matrix.arch }}/${{ matrix.output }}
+      #     mv ./node_sqlite3.node ./dungeon-revealer-linux-${{ matrix.arch }}/
+      #     mv ./LICENSE ./dungeon-revealer-linux-${{ matrix.arch }}/
+      #     mv ./README.md ./dungeon-revealer-linux-${{ matrix.arch }}/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dungeon-revealer-linux-${{ matrix.arch }}
-          path: "dungeon-revealer-linux-${{ matrix.arch }}/"
+          name: binaries
+          path: "compile/${{ matrix.output }}"
 
   job_upload:
     name: Upload Release Assets
@@ -147,6 +143,7 @@ jobs:
       # Zip all artifacts
       - name: Zip Archives
         run: |
+          find .
           cd bin
           chmod +x ./dungeon-revealer-macos/dungeon-revealer-macos
           chmod +x ./dungeon-revealer-ubuntu/dungeon-revealer-linux
