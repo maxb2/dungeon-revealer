@@ -33,29 +33,19 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
-          echo "## CAXA ##"
-          npx caxa -V
 
       - name: Build Code
         run: |
           npm run build
-          echo "## CAXA ##"
-          npx caxa -V
 
       - name: Compile x64 binary
         id: compile
         run: |
-          echo "## CAXA ##"
-          npx caxa -V
           mkdir compile
           cp -r build server-build node_modules package.json package-lock.json compile/
           cd compile
-          ls -alh
-          echo "#######"
-          find .
-          echo "## CAXA ##"
-          npx caxa -V
           npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
+          ls -alh
         shell: bash
 
       # - name: Package binary
@@ -111,7 +101,7 @@ jobs:
 
       - name: Build ${{ matrix.arch }}
         run: |
-          CMD='npm install && npm run build && mkdir compile && cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ && cd compile && npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
+          CMD='echo "unsafe-perm = true" > .npmrc && npm install && npm run build && mkdir compile && cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ && cd compile && npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
           docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_image }} sh -c "$CMD"
 
       # - name: Package binary
