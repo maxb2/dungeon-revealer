@@ -98,7 +98,7 @@ jobs:
 
       - name: Build ${{ matrix.arch }}
         run: |
-          CMD='npm install && npm run build && mkdir compile && cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ && cd compile && npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
+          CMD='npm install && npm run build && mkdir compile && cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ && cd compile && npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
           docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_image }} sh -c "$CMD"
 
       # - name: Package binary
