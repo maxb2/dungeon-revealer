@@ -33,18 +33,24 @@ jobs:
       - name: Install Dependencies
         run: |
           npm install
+          echo "## CAXA ##"
           npx caxa -V
 
       - name: Build Code
         run: |
           npm run build
+          echo "## CAXA ##"
+          npx caxa -V
 
       - name: Compile x64 binary
         id: compile
         run: |
+          echo "## CAXA ##"
+          npx caxa -V
           mkdir compile
           cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ # copy only required files
           cd compile
+          echo "## CAXA ##"
           npx caxa -V
           npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
         shell: bash
