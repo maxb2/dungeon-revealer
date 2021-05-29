@@ -48,8 +48,10 @@ jobs:
           echo "## CAXA ##"
           npx caxa -V
           mkdir compile
-          cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ # copy only required files
+          cp -r build server-build node_modules package.json package-lock.json compile/
           cd compile
+          ls -alh
+          echo "#######"
           find .
           echo "## CAXA ##"
           npx caxa -V
