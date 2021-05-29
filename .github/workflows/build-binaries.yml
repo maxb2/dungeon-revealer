@@ -6,6 +6,7 @@ on:
     tags:
       - "v*"
 
+
 jobs:
   build_x64_native:
     name: ${{ matrix.os }} Binaries
@@ -39,6 +40,7 @@ jobs:
 
       - name: Compile x64 binary
         id: compile
+        shell: bash
         run: |
           mkdir compile
           cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ # copy only required files
