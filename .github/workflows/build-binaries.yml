@@ -40,12 +40,12 @@ jobs:
 
       - name: Compile x64 binary
         id: compile
-        shell: bash
         run: |
           mkdir compile
           cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ # copy only required files
           cd compile
           npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
+        shell: bash
 
       # - name: Package binary
       #   run: |
