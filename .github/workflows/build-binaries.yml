@@ -45,7 +45,11 @@ jobs:
         id: compile
         run: |
           mkdir compile
-          cp -r build server-build node_modules package.json package-lock.json compile/
+          cp -r build compile/
+          cp -r server-build compile/
+          cp -r node_modules compile/
+          cp package.json compile/
+          cp package-lock.json compile/
           cd compile
           npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
           ls -alh
