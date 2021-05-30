@@ -98,7 +98,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: bin
-          path: "compile/${{ matrix.output }}"
+          path: ${{ matrix.output }}
 
   job_upload:
     name: Upload Release Assets
