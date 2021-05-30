@@ -109,7 +109,7 @@ jobs:
 
       - name: Build ${{ matrix.arch }}
         run: |
-          CMD='echo "unsafe-perm = true" > .npmrc && npm install && npm run build && mkdir compile && cp -r build/ server-build/ node_modules/ package.json package-lock.json compile/ && cd compile && npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
+          CMD='echo "unsafe-perm = true" > .npmrc && npm install && npm run build && rm .npmrc && npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
           docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_image }} sh -c "$CMD"
 
       # - name: Package binary
@@ -154,15 +154,15 @@ jobs:
         run: |
           find .
           cd bin
+          rm dungeon-revealer || true
           chmod +x ./dungeon-revealer-macos
           chmod +x ./dungeon-revealer-linux
           chmod +x ./dungeon-revealer-linux-armv7
           chmod +x ./dungeon-revealer-linux-arm64
           shasum -a 256 * | tee checksums.txt
-          rm dungeon-revealer || true
-          for f in *;
+          for f in dungeon*;
           do
-            zip "${f%.exe}-${{ env.GH_TAG }}.zip" "$f" ../LICENSE ../README.md checksums.txt;
+            zip -j "${f%.exe}-${{ env.GH_TAG }}.zip" "$f" ../LICENSE ../README.md checksums.txt;
           done
 
       - name: Upload Zip Artifacts
