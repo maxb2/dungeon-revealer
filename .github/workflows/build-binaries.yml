@@ -17,13 +17,13 @@ jobs:
         include:
           - os: linux
             runner: ubuntu-latest
-            output: dungeon-revealer-linux
+            output: dungeon-revealer-linux-x64
           - os: macos
             runner: macos-latest
-            output: dungeon-revealer-macos
+            output: dungeon-revealer-macos-x64
           - os: windows
             runner: windows-latest
-            output: dungeon-revealer.exe
+            output: dungeon-revealer-windows.exe
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -127,8 +127,8 @@ jobs:
         run: |
           cd bin
           rm dungeon-revealer || true
-          chmod +x ./dungeon-revealer-macos
-          chmod +x ./dungeon-revealer-linux
+          chmod +x ./dungeon-revealer-macos-x64
+          chmod +x ./dungeon-revealer-linux-x64
           chmod +x ./dungeon-revealer-linux-armv7
           chmod +x ./dungeon-revealer-linux-arm64
           shasum -a 256 * | tee checksums.txt
