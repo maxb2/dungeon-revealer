@@ -6,11 +6,29 @@ on:
     tags:
       - "v*"
 
-
 jobs:
+  branch:
+    name: Get branch info
+    id: branch
+    steps:
+      - name: Get branch names
+        id: branch-name
+        uses: tj-actions/branch-names@v4.3
+
+      - name: "Set environment: Branch"
+        if: steps.branch-name.outputs.is_tag == 'false'
+        run: |
+          echo "version_string=${{ steps.branch-name.outputs.current_branch }}-${GITHUB_SHA::6}" >> $GITHUB_ENV
+
+      - name: "Set environment: Tags"
+        if: steps.branch-name.outputs.is_tag == 'true'
+        run: |
+          echo "version_string=${{ steps.branch-name.outputs.tag }}" >> $GITHUB_ENV
+
   build_x64:
     name: ${{ matrix.os }} Binaries
     runs-on: ${{ matrix.runner }}
+    needs: branch
     strategy:
       matrix:
         os: [linux, macos, windows]
@@ -49,11 +67,12 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.output }}-${GITHUB_SHA::6}  
+          name: ${{ matrix.output }}-${{ env.version_string }}  
           path: "${{ matrix.output }}"
 
   build_arm:
     name: Linux ${{ matrix.arch }} Binaries
+    needs: branch
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -97,7 +116,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.output }}-${GITHUB_SHA::6} 
+          name: ${{ matrix.output }}-${{ env.version_string }} 
           path: ${{ matrix.output }}
 
   package:
@@ -107,20 +126,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Get branch names
-        id: branch-name
-        uses: tj-actions/branch-names@v4.3
-
-      - name: "Set environment: Branch"
-        if: steps.branch-name.outputs.is_tag == 'false'
-        run: |
-          echo "version_string=${{ steps.branch-name.outputs.current_branch }}-${GITHUB_SHA::6}" >> $GITHUB_ENV
-
-      - name: "Set environment: Tags"
-        if: steps.branch-name.outputs.is_tag == 'true'
-        run: |
-          echo "version_string=${{ steps.branch-name.outputs.tag }}" >> $GITHUB_ENV
 
       - name: Download Artifacts
         uses: actions/download-artifact@v2
@@ -152,7 +157,7 @@ jobs:
 
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: steps.branch-name.outputs.is_tag == 'true'
+        if: branch.steps.branch-name.outputs.is_tag == 'true'
         with:
           name: Release ${{ env.version_string }}
           draft: true
@@ -163,7 +168,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Set environment for discord"
-        if: success() && steps.branch-name.outputs.is_tag == 'false'
+        if: success() && branch.steps.branch-name.outputs.is_tag == 'false'
         run: |
           # Template json to send as an embed
           # jq replaces $var with `jq --arg var <value> "$TEMPLATE"`
@@ -190,7 +195,7 @@ jobs:
           echo "DISCORD_EMBEDS=$(jq -nc --arg title "[${{ github.event.repository.name }}:${GITHUB_REF##*/}] binary build" --arg url "${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}" --arg color "16750848" --arg desc "$DESC" "$TEMPLATE")" >> $GITHUB_ENV
 
       - name: Discord notification
-        if: success() && steps.branch-name.outputs.is_tag == 'false'
+        if: success() && branch.steps.branch-name.outputs.is_tag == 'false'
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_UPDATES }}
         uses: Ilshidur/action-discord@0.3.0
