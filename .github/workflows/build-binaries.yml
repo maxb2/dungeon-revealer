@@ -9,6 +9,7 @@ on:
 jobs:
   branch:
     name: Get branch info
+    runs-on: ubuntu-latest
     id: branch
     steps:
       - name: Get branch names
