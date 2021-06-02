@@ -8,7 +8,7 @@ on:
 
 
 jobs:
-  build_x64_native:
+  build_x64:
     name: ${{ matrix.os }} Binaries
     runs-on: ${{ matrix.runner }}
     strategy:
@@ -49,22 +49,22 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.output }}
+          name: ${{ matrix.output }}-bin  # append "-bin" to avoid name conflicts when flattening after downloading
           path: "${{ matrix.output }}"
 
   build_arm:
-    name: ${{ matrix.arch }} Binaries
-    runs-on: ubuntu-20.04
+    name: Linux ${{ matrix.arch }} Binaries
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [linux/arm/v7, linux/arm64/v8]
+        arch: [armv7, arm64]
         include:
-          - platform: linux/arm/v7
-            arch: armv7
+          - arch: armv7
+            docker_platform: linux/arm/v7
             docker_image: arm32v7/node:12
             output: dungeon-revealer-linux-armv7
-          - platform: linux/arm64/v8
-            arch: arm64
+          - arch: arm64
+            docker_platform: linux/arm64/v8
             docker_image: arm64v8/node:12
             output: dungeon-revealer-linux-arm64
     steps:
@@ -75,7 +75,7 @@ jobs:
         id: qemu
         uses: docker/setup-qemu-action@v1
         with:
-          platforms: ${{ matrix.platform }}
+          platforms: ${{ matrix.docker_platform }}
 
       - name: Available platforms
         run: echo ${{ steps.qemu.outputs.platforms }}
@@ -92,18 +92,18 @@ jobs:
       - name: Build ${{ matrix.arch }}
         run: |
           CMD='echo "unsafe-perm = true" > .npmrc && npm install && npm run build && rm .npmrc && npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
-          docker run --rm --platform ${{ matrix.platform }} -v $PWD:/usr/src/build -w /usr/src/build ${{ matrix.docker_image }} sh -c "$CMD"
+          docker run --rm --platform ${{ matrix.docker_platform }} -v $PWD:/caxa -w /caxa ${{ matrix.docker_image }} sh -c "$CMD"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.output }}
+          name: ${{ matrix.output }}-bin  # append "-bin" to avoid name conflicts when flattening after downloading
           path: ${{ matrix.output }}
 
-  job_upload:
-    name: Upload Release Assets
-    needs: [build_x64_native, build_arm]
-    runs-on: ubuntu-20.04
+  package:
+    name: Package Built files
+    needs: [build_x64, build_arm]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -125,17 +125,19 @@ jobs:
         with:
           path: bin/
 
+      - name: File Checksums
+        run: |
+          cd bin
+          rm -rf dungeon-revealer || true                         # remove unnecessary script
+          find . -type f -exec mv {} ./ \;                        # move files from subdirectories to top directory
+          find . -type d -not -path "." -exec rmdir {} +          # remove empty subdirectories
+          find . -type f -not -path "*.exe" -exec chmod +x {} +   # make linux & macos files executable
+          shasum -a 256 * | tee -a checksums.txt                  # show file checksums
+
       - name: Zip Archives
         run: |
           cd bin
-          ls -alh
-          rm dungeon-revealer || true
-          chmod +x ./dungeon-revealer-macos-x64
-          chmod +x ./dungeon-revealer-linux-x64
-          chmod +x ./dungeon-revealer-linux-armv7
-          chmod +x ./dungeon-revealer-linux-arm64
-          shasum -a 256 * | tee checksums.txt
-          for f in dungeon*;
+          for f in $(find . -type f -name "dungeon*");            # package each executable in zip
           do
             zip -j "${f%.exe}-${{ env.GH_TAG }}.zip" "$f" ../LICENSE ../README.md checksums.txt;
           done
@@ -146,6 +148,12 @@ jobs:
           name: dungeon-revealer-zips-${{ env.GH_TAG }}
           path: "bin/*.zip"
 
+
+  release:
+    name: Create Release
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
