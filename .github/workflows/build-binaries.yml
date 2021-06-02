@@ -97,7 +97,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.output }}-${GITHUB_SHA::6} 
+          name: ${{ matrix.output }}-${ github.sha } 
           path: ${{ matrix.output }}
 
   package:
