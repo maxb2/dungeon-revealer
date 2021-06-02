@@ -49,7 +49,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.output }}-${ github.sha }  
+          name: ${{ matrix.output }}-${{ github.sha }}  
           path: "${{ matrix.output }}"
 
   build_arm:
@@ -97,7 +97,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.output }}-${ github.sha } 
+          name: ${{ matrix.output }}-${{ github.sha }} 
           path: ${{ matrix.output }}
 
   package:
