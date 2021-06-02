@@ -49,7 +49,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: bin
+          name: ${{ matrix.output }}
           path: "${{ matrix.output }}"
 
   build_arm:
@@ -97,7 +97,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: bin
+          name: ${{ matrix.output }}
           path: ${{ matrix.output }}
 
   job_upload:
@@ -122,10 +122,13 @@ jobs:
 
       - name: Download Artifacts
         uses: actions/download-artifact@v2
+        with:
+          path: bin/
 
       - name: Zip Archives
         run: |
           cd bin
+          ls -alh
           rm dungeon-revealer || true
           chmod +x ./dungeon-revealer-macos-x64
           chmod +x ./dungeon-revealer-linux-x64
@@ -140,7 +143,7 @@ jobs:
       - name: Upload Zip Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dungeon-revealer-binaries-${{ env.GH_TAG }}
+          name: dungeon-revealer-zips-${{ env.GH_TAG }}
           path: "bin/*.zip"
 
       - name: Release
