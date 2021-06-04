@@ -47,7 +47,8 @@ jobs:
       - name: Compile x64 binary
         id: compile
         run: |
-          npx caxa -i . -o ${{ matrix.output }} --exclude bin CODE_OF_CONDUCT.md app.json .vscode .eslintignore .gitignore .eslintrc.js .prettierignore patches vite.config.ts type-definitions.graphql .prettierrc LICENSE wiki public README.md .dockerignore scripts src relay.config.js Dockerfile CONTRIBUTING.md tsconfig.json .babel-plugin-macrosrc.json .git babel.config.js docs jest.config.js .github renovate.json index.html server -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
+          find . -maxdepth 1 -not -name "package*" -not -name build -not -name server-build -not -name node_modules -not -path "." -exec rm -rf {} \;
+          npx caxa -i . -o ${{ matrix.output }} -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
