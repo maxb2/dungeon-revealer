@@ -34,7 +34,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v2
         with:
-          node-version: 12
+          node-version: 16
 
       - name: Install Dependencies
         run: |
@@ -65,11 +65,11 @@ jobs:
         include:
           - arch: armv7
             docker_platform: linux/arm/v7
-            docker_image: arm32v7/node:12
+            docker_image: arm32v7/node:16
             output: dungeon-revealer-linux-armv7
           - arch: arm64
             docker_platform: linux/arm64/v8
-            docker_image: arm64v8/node:12
+            docker_image: arm64v8/node:16
             output: dungeon-revealer-linux-arm64
     steps:
       - name: Checkout code
@@ -95,7 +95,7 @@ jobs:
 
       - name: Build ${{ matrix.arch }}
         run: |
-          # For spme reason `npm run build` fails with `glob error [Error: EACCES: permission denied, scandir '/root/.npm/_logs']` when run on the mounted directory
+          # For some reason `npm run build` fails with `glob error [Error: EACCES: permission denied, scandir '/root/.npm/_logs']` when run on the mounted directory
           # Copying the source to an internal directory is a workaround
           CMD='cp -r /caxa /caxa2 && cd /caxa2 && echo "unsafe-perm = true" > .npmrc && npm install -g npm@7 && npm ci && npm run build && npx caxa -i . -o /caxa/${{ matrix.output }} -e server-build -e build -e package.json -e package-lock.json -e node_modules -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
           docker run --rm --platform ${{ matrix.docker_platform }} -v $PWD:/caxa ${{ matrix.docker_image }} sh -c "$CMD"
