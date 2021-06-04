@@ -38,7 +38,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          npm install
+          npm install -g npm@7
+          npm ci
 
       - name: Build Code
         run: |
@@ -94,7 +95,7 @@ jobs:
 
       - name: Build ${{ matrix.arch }}
         run: |
-          CMD='echo "unsafe-perm = true" > .npmrc && npm install && npm run build && npx caxa -i . -o ${{ matrix.output }} --exclude * '\''\.*'\'' '\''!node_modules'\'' '\''!server-build'\'' '\''!build'\'' '\''!package*'\'' -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
+          CMD='echo "unsafe-perm = true" > .npmrc && npm install -g npm@7 && npm ci && npm run build && npx caxa -i . -o ${{ matrix.output }} --exclude * '\''\.*'\'' '\''!node_modules'\'' '\''!server-build'\'' '\''!build'\'' '\''!package*'\'' -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
           docker run --rm --platform ${{ matrix.docker_platform }} -v $PWD:/caxa -w /caxa ${{ matrix.docker_image }} sh -c "$CMD"
 
       - name: Upload artifacts
