@@ -48,6 +48,7 @@ jobs:
         id: compile
         run: |
           EXCLUDE=$(find . -maxdepth 1 -not -name "package*" -not -name build -not -name server-build -not -name node_modules -not -path '.' -exec echo {} +)
+          echo "$EXCLUDE"
           npx caxa -i . -o ${{ matrix.output }} --exclude $EXCLUDE -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"
 
       - name: Upload artifacts
