@@ -96,7 +96,8 @@ jobs:
 
       - name: Build ${{ matrix.arch }}
         run: |
-          CMD='echo "unsafe-perm = true" > .npmrc && npm install && npm run build && EXCLUDE=$(find . -maxdepth 1 -not -name "package*" -not -name build -not -name server-build -not -name node_modules -not -path "." -exec echo {} + | sed \'s|./||g\') && npx caxa -i . -o ${{ matrix.output }} --exclude $EXCLUDE -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
+          CMD='echo "unsafe-perm = true" > .npmrc && npm install && npm run build && EXCLUDE=$(find . -maxdepth 1 -not -name "package*" -not -name build -not -name server-build -not -name node_modules -not -path "." -exec echo {} + | sed '\''s|./||g'\'') && npx caxa -i . -o ${{ matrix.output }} --exclude $EXCLUDE -- "{{caxa}}/node_modules/.bin/node" "{{caxa}}/server-build/index.js"'
+          echo "$CMD"
           docker run --rm --platform ${{ matrix.docker_platform }} -v $PWD:/caxa -w /caxa ${{ matrix.docker_image }} sh -c "$CMD"
 
       - name: Upload artifacts
